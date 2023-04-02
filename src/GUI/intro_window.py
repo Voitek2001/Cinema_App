@@ -33,6 +33,7 @@ class Ui_intro(object):
 "    border: 2px solid rgb(255, 0, 127);\n"
 "}")
         self.select_film.setObjectName("select_film")
+        self.select_film.clicked.connect(self.go_to_select_film)
         self.admin_panel = QtWidgets.QPushButton(self.centralwidget)
         self.admin_panel.setGeometry(QtCore.QRect(200, 380, 360, 51))
         font = QtGui.QFont()
@@ -71,9 +72,9 @@ class Ui_intro(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-
     def go_to_select_film(self):
-        pass
+        self.widget.setCurrentIndex(self.widget.currentIndex() + 5)
+
     def go_to_admin_panel(self):
         self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
 
