@@ -56,7 +56,7 @@ def get_list_of_films():
 
     for film in data:
 
-        all_films[film['title']] = all_films.get(film['title'], []) + [{"date": get_datetime_from_string(film['film_datetime']), "room": film['room_id']}]
+        all_films[film['title']] = all_films.get(film['title'], []) + [{"date": get_datetime_from_string(film['film_datetime']), "room": film['room_id'], "price": film['price']}]
 
     print(all_films)
     return all_films

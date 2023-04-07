@@ -50,12 +50,12 @@ class Ui_show_film_window(object):
         self.normal_tickets_label.setFont(font)
         self.normal_tickets_label.setAutoFillBackground(False)
         self.normal_tickets_label.setStyleSheet("QLabel {\n"
-                                        "    background: rgb(0, 170, 255);\n"
-                                        "    border: 2px solid rgb(0, 170, 255);\n"
-                                        "    border-radius: 10px;\n"
-                                        "    color: white;\n"
-                                        "}\n"
-                                        "")
+                                                "    background: rgb(0, 170, 255);\n"
+                                                "    border: 2px solid rgb(0, 170, 255);\n"
+                                                "    border-radius: 10px;\n"
+                                                "    color: white;\n"
+                                                "}\n"
+                                                "")
         self.normal_tickets_label.setAlignment(QtCore.Qt.AlignCenter)
         self.normal_tickets_label.setObjectName("normal_tickets_label")
 
@@ -76,12 +76,12 @@ class Ui_show_film_window(object):
         self.discounted_tickets_label.setFont(font)
         self.discounted_tickets_label.setAutoFillBackground(False)
         self.discounted_tickets_label.setStyleSheet("QLabel {\n"
-                                                "    background: rgb(0, 170, 255);\n"
-                                                "    border: 2px solid rgb(0, 170, 255);\n"
-                                                "    border-radius: 10px;\n"
-                                                "    color: white;\n"
-                                                "}\n"
-                                                "")
+                                                    "    background: rgb(0, 170, 255);\n"
+                                                    "    border: 2px solid rgb(0, 170, 255);\n"
+                                                    "    border-radius: 10px;\n"
+                                                    "    color: white;\n"
+                                                    "}\n"
+                                                    "")
         self.discounted_tickets_label.setAlignment(QtCore.Qt.AlignCenter)
         self.discounted_tickets_label.setObjectName("discounted_tickets_label")
 
@@ -99,7 +99,7 @@ class Ui_show_film_window(object):
         self.go_further.setEnabled(False)
         self.go_further.setGeometry(QtCore.QRect(200, 400, 360, 51))
         font = QtGui.QFont()
-        font.setPointSize(12)
+        font.setPointSize(11)
         self.go_further.setFont(font)
         self.go_further.setStyleSheet(
             "QPushButton {background: rgb(0, 170, 255);border: 2px solid rgb(0, 170, 255);border-radius: 20px;color: white;} QPushButton:hover {background-color: rgb(255, 0, 127);border: 2px solid rgb(255, 0, 127);}")
@@ -108,7 +108,10 @@ class Ui_show_film_window(object):
 
         # return button
         self.return_button = QtWidgets.QPushButton(show_film_window)
-        self.return_button.setGeometry(QtCore.QRect(50, 520, 221, 61))
+        self.return_button.setGeometry(QtCore.QRect(50, 520, 221, 51))
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        self.return_button.setFont(font)
         self.return_button.setStyleSheet("QPushButton {\n"
                                          "    background: rgb(0, 170, 255);\n"
                                          "    border: 2px solid rgb(0, 170, 255);\n"
@@ -155,6 +158,7 @@ class Ui_show_film_window(object):
         film = self.select_film.currentText()
         for event in self.films[film]:
             self.select_date.addItem(f'{str(event["date"])} sala {event["room"]}')
+            self.select_date.setItemData(-1, event["price"])
 
     def date_checked(self):
         checked = self.select_date.currentIndex()
@@ -174,14 +178,21 @@ class Ui_show_film_window(object):
 
     def go_further_clicked(self):
         film = self.select_film.currentText()
-        event = self.films[film][self.select_date.currentIndex()-1]
+        event = self.films[film][self.select_date.currentIndex() - 1]
         tickets = {'normal': self.normal_tickets.value(), 'discounted': self.discounted_tickets.value()}
-        print(f'Wybrano {film} {str(event["date"])} sala {event["room"]}. Bilety: {tickets}')
+        print(f'Wybrano {film} {str(event["date"])} sala {event["room"]} cena {event["price"]}. Bilety: {tickets}')
+
+        self.widget.widget(6).property('ui').set_number_of_tickets(sum(tickets.values()))
+        self.widget.widget(6).property('ui').uncheck_seats()
+        self.widget.currentWidget().setProperty('film', film)
+        self.widget.currentWidget().setProperty('date', event['date'])
+        self.widget.currentWidget().setProperty('room', event['room'])
+        self.widget.currentWidget().setProperty('price', event['price'])
+        self.widget.currentWidget().setProperty('tickets', tickets)
         self.widget.setCurrentIndex(6)
-        # self.widget.widget(6).number_of_tickets = sum(tickets.values())
 
     def go_to_intro(self):
-        self.widget.setCurrentIndex(4)
+        self.widget.setCurrentIndex(0)
 
 
 if __name__ == "__main__":
@@ -193,4 +204,3 @@ if __name__ == "__main__":
     ui.setupUi(show_film_window)
     show_film_window.show()
     sys.exit(app.exec_())
-

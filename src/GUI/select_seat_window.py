@@ -5,6 +5,7 @@ class Ui_select_seats(object):
     def __init__(self, widget):
         self.widget = widget
         self.number_of_tickets = 3
+        self.checked = set()
 
     def setupUi(self, select_seats):
         select_seats.setObjectName("select_seats")
@@ -43,7 +44,7 @@ class Ui_select_seats(object):
                 self.seats[-1].setStyleSheet("QPushButton {background: green; border:none}"
                                              "QPushButton:disabled {background: gray;}"
                                              "QPushButton:checked {background: orange;}")
-                self.seats[-1].clicked.connect(self.seat_clicked)
+                self.seats[-1].clicked.connect(lambda checked, seat=self.seats[-1]: self.seat_clicked(seat))
 
         # count of checked seats label
         self.label_2 = QtWidgets.QLabel(select_seats)
@@ -58,9 +59,9 @@ class Ui_select_seats(object):
         # go further button
         self.go_further = QtWidgets.QPushButton(self.centralwidget)
         self.go_further.setEnabled(False)
-        self.go_further.setGeometry(QtCore.QRect(300, 590, 410, 61))
+        self.go_further.setGeometry(QtCore.QRect(300, 590, 410, 51))
         font = QtGui.QFont()
-        font.setPointSize(12)
+        font.setPointSize(11)
         self.go_further.setFont(font)
         self.go_further.setStyleSheet(
             "QPushButton {background: rgb(0, 170, 255);border: 2px solid rgb(0, 170, 255);border-radius: 20px;color: white;} QPushButton:hover {background-color: rgb(255, 0, 127);border: 2px solid rgb(255, 0, 127);}")
@@ -69,7 +70,10 @@ class Ui_select_seats(object):
 
         # return button
         self.return_button = QtWidgets.QPushButton(select_seats)
-        self.return_button.setGeometry(QtCore.QRect(50, 590, 221, 61))
+        self.return_button.setGeometry(QtCore.QRect(50, 590, 221, 51))
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        self.return_button.setFont(font)
         self.return_button.setStyleSheet("QPushButton {\n"
                                          "    background: rgb(0, 170, 255);\n"
                                          "    border: 2px solid rgb(0, 170, 255);\n"
@@ -82,7 +86,7 @@ class Ui_select_seats(object):
                                          "    border: 2px solid rgb(255, 0, 127);\n"
                                          "}")
         self.return_button.setObjectName("return_button")
-        self.return_button.clicked.connect(self.go_to_intro)
+        self.return_button.clicked.connect(self.go_back)
 
         self.retranslateUi(select_seats)
         QtCore.QMetaObject.connectSlotsByName(select_seats)
@@ -92,25 +96,50 @@ class Ui_select_seats(object):
         select_seats.setWindowTitle(_translate("select_seats", "Form"))
         self.label.setText(_translate("select_seats", "Ekran"))
         self.label_2.setText(
-            _translate("select_seats", f'Wybrano {len(self.checked)}/{self.number_of_tickets} miejsc.'))
+            _translate("select_seats", f'Wybrano 0/{self.number_of_tickets} miejsc.'))
         self.go_further.setText(_translate("select_seats", "Przejdź dalej"))
         self.return_button.setText(_translate("select_seats", "Powrót do wyboru filmu"))
 
-    def seat_clicked(self):
-        number_of_clicked = 0
+    def set_number_of_tickets(self, number):
+        _translate = QtCore.QCoreApplication.translate
+        self.number_of_tickets = number
+        self.label_2.setText(
+            _translate("select_seats", f'Wybrano 0/{self.number_of_tickets} miejsc.'))
+
+    def uncheck_seats(self):
+        self.checked.clear()
         for seat in self.seats:
-            if seat.isChecked():
-                number_of_clicked += 1
+            seat.setEnabled(True)
+            seat.setChecked(False)
+
+    def seat_clicked(self, seat):
+        row = seat.property('row')
+        column = seat.property('column')
+        if seat.isChecked():
+            self.checked.add((row, column))
+        else:
+            self.checked.remove((row, column))
+        number_of_clicked = len(self.checked)
         if number_of_clicked == self.number_of_tickets:
             self.go_further.setEnabled(True)
+            self.set_button_enabled(False)
         else:
             self.go_further.setEnabled(False)
+            self.set_button_enabled(True)
         self.label_2.setText(f'Wybrano {number_of_clicked}/{self.number_of_tickets} miejsc.')
 
-    def go_further_clicked(self):
-        self.widget.setCurrentIndex(0)
+    def set_button_enabled(self, value):
+        for seat in self.seats:
+            if not seat.isChecked():
+                seat.setEnabled(value)
 
-    def go_to_intro(self):
+    def go_further_clicked(self):
+        self.widget.currentWidget().setProperty('seats', self.checked)
+        self.widget.widget(7).property('ui').load_film_details()
+        self.widget.widget(7).property('ui').fill_payment_table()
+        self.widget.setCurrentIndex(7)
+
+    def go_back(self):
         self.widget.setCurrentIndex(5)
         print(self.number_of_tickets)
 
