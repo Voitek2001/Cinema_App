@@ -1,10 +1,12 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from user.user_utils import add_order_details
+from ID_generator import get_and_inc_order, get_and_inc_payment_id
 
 
 class Ui_reservation_summary(object):
     def __init__(self, widget):
         self.widget = widget
-
+        self.selected_seats = []
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(760, 670)
@@ -138,11 +140,36 @@ class Ui_reservation_summary(object):
         total_price = tickets['normal'] * price['normal'] + tickets['discounted'] * price['discounted']
         self.price_label.setText(f'Łączna wartość zamówienia: {total_price}')
 
+        self.widget.widget(9).property("ui").set_total_cost(total_price)
+
+
     def go_further_clicked(self):
+
+        order_id = get_and_inc_order()
+        film_id = self.widget.widget(5).property('film_id')
+        payment_id = get_and_inc_payment_id()
+        self.widget.widget(9).setProperty('payment_id', payment_id)
+        self.widget.widget(9).setProperty("order_id", order_id)
+        tickets = self.widget.widget(5).property('tickets')
+        price = self.widget.widget(5).property('price')
+        total_price = tickets['normal'] * price['normal'] + tickets['discounted'] * price['discounted']
+        try:
+            add_order_details(order_id, film_id,
+                              payment_id, tickets['normal'],
+                              tickets['discounted'], total_price, self.selected_seats)
+        except Exception as err_msg:
+            print(err_msg)
+            print("Bład podczas zapisywania do bazy danych")
+            self.widget.setCurrentIndex(0)
+            return
+
         self.widget.setCurrentIndex(8)
 
     def go_back(self):
         self.widget.setCurrentIndex(6)
+
+    def init_selected_seats(self, seats):
+        self.selected_seats = seats
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate

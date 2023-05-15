@@ -137,6 +137,7 @@ class Ui_select_seats(object):
         self.widget.currentWidget().setProperty('seats', self.checked)
         self.widget.widget(7).property('ui').load_film_details()
         self.widget.widget(7).property('ui').fill_payment_table()
+        self.widget.widget(7).property('ui').init_selected_seats(self.checked)
         self.widget.setCurrentIndex(7)
 
     def go_back(self):

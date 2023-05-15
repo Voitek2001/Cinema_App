@@ -1,9 +1,23 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QSettings
 
 
 class Ui_intro(object):
     def __init__(self, widget):
         self.widget = widget
+
+        self.widget.closeEvent = self.closeEvent
+
+    def closeEvent(self, event):
+        print("jd")
+        # reply = QtGui.QMessageBox.question(self, 'Message',
+        #                                    "Are you sure to quit?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        #
+        # if reply == QtGui.QMessageBox.Yes:
+        #     event.accept()
+        # else:
+        #     event.ignore()
+
 
 
     def setupUi(self, MainWindow):

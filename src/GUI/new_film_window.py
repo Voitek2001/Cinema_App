@@ -139,8 +139,13 @@ class Ui_NewFilm(object):
         self.lineEdit_4 = QtWidgets.QLineEdit(new_film)
         self.lineEdit_4.setGeometry(QtCore.QRect(360, 450, 300, 40))
         self.lineEdit_4.setObjectName("lineEdit_4")
+
+        self.lineEdit_6 = QtWidgets.QLineEdit(new_film)
+        self.lineEdit_6.setGeometry(QtCore.QRect(360, 520, 300, 40))
+        self.lineEdit_6.setObjectName("lineEdit_5")
+
         self.new_film_send = QtWidgets.QPushButton(new_film)
-        self.new_film_send.setGeometry(QtCore.QRect(265, 570, 200, 40))
+        self.new_film_send.setGeometry(QtCore.QRect(265, 590, 200, 40))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.new_film_send.setFont(font)
@@ -212,12 +217,27 @@ class Ui_NewFilm(object):
         self.label_3.setObjectName("label_3")
 
         self.label_4 = QtWidgets.QLabel(new_film)
-        self.label_4.setGeometry(QtCore.QRect(180, 510, 400, 40))
+        self.label_4.setGeometry(QtCore.QRect(180, 555, 400, 40))
         self.label_4.setStyleSheet("QLabel {\n"
 "background:rgba(255, 255, 255, 0);\n"
 "color: red;\n"
 "}")
         self.label_4.setObjectName("label_4")
+
+        self.label_5 = QtWidgets.QLabel(new_film)
+        self.label_5.setGeometry(QtCore.QRect(110, 520, 200, 40))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        self.label_5.setFont(font)
+        self.label_5.setStyleSheet("\n"
+                                         "QLabel {\n"
+                                         "    background: rgb(0, 170, 255);\n"
+                                         "    border: 2px solid rgb(0, 170, 255);\n"
+                                         "    border-radius: 20px;\n"
+                                         "    color: white;\n"
+                                         "}")
+        self.label_5.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_5.setObjectName("label_5")
 
         self.retranslateUi(new_film)
         QtCore.QMetaObject.connectSlotsByName(new_film)
@@ -231,23 +251,36 @@ class Ui_NewFilm(object):
         film_duration = self.lineEdit_3.text()
         film_hour = self.lineEdit_5.text()
         film_room_id = self.lineEdit_4.text()
-
-
+        ticket_price = self.lineEdit_6.text()
+        try:
+            _ = int(film_room_id)
+        except ValueError as err_msg:
+            print(err_msg)
+            self.label_4.setText("Numer sali musi być liczbą")
+            return
+        try:
+            _ = int(ticket_price)
+        except ValueError as err_msg:
+            print(err_msg)
+            self.label_4.setText("Cena musi być liczbą")
+            return
         try:
             film_dur = get_timedelta_from_string(film_duration)
             newfilm_datetime = datetime.datetime.strptime(film_date, "%Y-%m-%d") + get_timedelta_from_string(film_hour)
-            try:
-                add_new_film(newfilm_datetime, film_dur, film_cat, film_title, film_room_id)
-                self.label_4.setText("Dodano pomyślnie nowy film")
-            except ValueError as err_msg:
-                print(err_msg)
-                self.label_4.setText(str(err_msg))
+
         except ValueError as err_msg:
             print(err_msg)
             print("Błedny format dla godziny lub daty!")
             self.label_4.setText("Błedny format dla godziny lub daty!")
         #2010-04-10 13:20:00, TRWAJACYM 2:00:00 W SALI 1]
-
+            return
+        try:
+            _ = int(ticket_price)
+            add_new_film(newfilm_datetime, film_dur, film_cat, film_title, film_room_id, ticket_price)
+            self.label_4.setText("Dodano pomyślnie nowy film")
+        except ValueError as err_msg:
+            print(err_msg)
+            self.label_4.setText(str(err_msg))
 
     def go_back_to_admin_panel(self):
         self.widget.setCurrentIndex(2)
@@ -287,6 +320,7 @@ class Ui_NewFilm(object):
         self.label_2.setText(_translate("new_film", "Wymagany format: \"%H:%M:%S\""))
         self.new_film_hour.setText(_translate("new_film", "Godzina:"))
         self.label_3.setText(_translate("new_film", "Wymagany format: \"%H:%M:%S\""))
+        self.label_5.setText(_translate("new_film", "Cena biletu:"))
 
 def switch_cat(curr_cat):
 

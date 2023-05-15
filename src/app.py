@@ -9,16 +9,22 @@ from GUI.select_film_window import Ui_show_film_window
 from GUI.select_seat_window import Ui_select_seats
 from GUI.reservation_summary import Ui_reservation_summary
 from GUI.choose_payment_method import Ui_choose_payment_method
+from GUI.payment_window import Ui_payment
+from GUI.admin_panelv2 import Ui_admin
+from ID_generator import init_order_id, init_film_id, init_payment_id
 
 
 if __name__ == '__main__':
 
-
+    init_order_id()
+    init_film_id()
+    init_payment_id()
     app = QtWidgets.QApplication(sys.argv)
     widget = QtWidgets.QStackedWidget()
 
     # init main window
     MainWindow = QtWidgets.QMainWindow()
+    # MainWindow.show()
     intro_ui = Ui_intro(widget)
     intro_ui.setupUi(MainWindow)
 
@@ -28,8 +34,12 @@ if __name__ == '__main__':
     ui.setupUi(login_ui)
 
     # init admin_panel window
+    # admin_panel = QtWidgets.QWidget()
+    # admin_ui = Ui_AdminPanel(widget)
+    # admin_ui.setupUi(admin_panel)
+
     admin_panel = QtWidgets.QWidget()
-    admin_ui = Ui_AdminPanel(widget)
+    admin_ui = Ui_admin(widget)
     admin_ui.setupUi(admin_panel)
 
     # init create_new_film window
@@ -63,6 +73,11 @@ if __name__ == '__main__':
     choose_payment_method_ui = Ui_choose_payment_method(widget)
     choose_payment_method_ui.setupUi(choose_payment_method_window)
 
+    payment_window = QtWidgets.QWidget()
+    payment_window_ui = Ui_payment(widget)
+    payment_window_ui.setupUi(payment_window)
+    payment_window.setProperty('ui', payment_window_ui)
+
     # add windows to widget
     widget.addWidget(MainWindow)
     widget.addWidget(login_ui)
@@ -73,6 +88,7 @@ if __name__ == '__main__':
     widget.addWidget(select_seat_window)
     widget.addWidget(reservation_summary_window)
     widget.addWidget(choose_payment_method_window)
+    widget.addWidget(payment_window)
 
     widget.setFixedWidth(760)
     widget.setFixedHeight(670)

@@ -1,5 +1,6 @@
 from common_utils import write_to_json, Category, read_json, get_datetime_from_string, get_timedelta_from_string
 from datetime import datetime, timedelta
+from ID_generator import get_and_inc_film_id
 import os
 import sys
 sys.path.append('/db/')
@@ -9,21 +10,23 @@ ALL_FILMS = os.path.abspath('db/films_data.json')
 sys.path.append(ALL_FILMS)
 
 
-def create_new_film(category, title, film_datetime, duration, room_id):
+def create_new_film(category, title, film_datetime, duration, room_id, price):
     return {
         'category': category.value, # to avoid problems with writing
         'title': title,
         'film_datetime': str(film_datetime), # to avoid problems with writing
         'duration': str(duration), # to avoid problems with writing
-        'room_id': room_id
+        'room_id': room_id,
+        'film_id': get_and_inc_film_id(),
+        "price": {"normal": price, "discounted": str(int(int(price)*0.8))}
     }
 
 
-def check_for_collision(data, new_film):
+def check_for_collision(data, room_id, date, duration):
 
-    room_id = new_film['room_id']
-    date = get_datetime_from_string(new_film['film_datetime'])
-    duration = get_timedelta_from_string(new_film['duration'])
+    # room_id = new_film['room_id']
+    # date = get_datetime_from_string(new_film['film_datetime'])
+    # duration = get_timedelta_from_string(new_film['duration'])
     for film in data:
         if room_id != film['room_id']:
             continue
@@ -37,13 +40,13 @@ def check_for_collision(data, new_film):
 ##[KOLIZJA Z FILMEM {film['title']} O GODZINIE "
 #                             f"{film['film_datetime']}, TRWAJACYM {film['duration']} W SALI {film['room_id']}]
 #
-def add_new_film(film_datetime, duration, category, title, room_id):
+def add_new_film(film_datetime, duration, category, title, room_id, ticket_price):
 
     data = read_json(ALL_FILMS)
 
-    new_film = create_new_film(category, title, film_datetime, duration, room_id)
+    check_for_collision(data, room_id, film_datetime, duration)
 
-    check_for_collision(data, new_film)
+    new_film = create_new_film(category, title, film_datetime, duration, room_id, ticket_price)
 
     data.append(new_film)
     write_to_json(ALL_FILMS, data)
@@ -56,7 +59,7 @@ def get_list_of_films():
 
     for film in data:
 
-        all_films[film['title']] = all_films.get(film['title'], []) + [{"date": get_datetime_from_string(film['film_datetime']), "room": film['room_id'], "price": film['price']}]
+        all_films[film['title']] = all_films.get(film['title'], []) + [{"date": get_datetime_from_string(film['film_datetime']), "room": film['room_id'], "price": film['price'], "film_id": film['film_id']}]
 
     print(all_films)
     return all_films

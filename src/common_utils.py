@@ -1,6 +1,7 @@
 import json
 import datetime
 from enum import Enum
+import os
 
 
 class Category(Enum):
@@ -24,7 +25,11 @@ def write_to_json(filename: str, data):
 
 def read_json(filename: str):
 
+    if os.stat(filename).st_size == 0:
+        print("pusty plik")
+        return []
     with open(filename) as json_file:
+
         data = json.load(json_file)
     return json.loads(data)
 

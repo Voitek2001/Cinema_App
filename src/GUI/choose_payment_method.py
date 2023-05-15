@@ -86,7 +86,8 @@ class Ui_choose_payment_method(object):
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def go_further_clicked(self):
-        self.widget.setCurrentIndex(0)
+        self.widget.setCurrentIndex(9)
+        
 
     def go_back(self):
         self.widget.setCurrentIndex(7)
