@@ -3,11 +3,14 @@ from datetime import datetime, timedelta
 from ID_generator import get_and_inc_film_id
 import os
 import sys
+import string
 sys.path.append('/db/')
 
 
 ALL_FILMS = os.path.abspath('db/films_data.json')
 sys.path.append(ALL_FILMS)
+ALL_ORDERS = os.path.abspath('db/orders.json')
+sys.path.append(ALL_ORDERS)
 
 
 def create_new_film(category, title, film_datetime, duration, room_id, price):
@@ -64,6 +67,26 @@ def get_list_of_films():
     print(all_films)
     return all_films
 
+
+def get_list_of_orders():
+
+    data = read_json(ALL_ORDERS)
+    all_orders = {}
+
+    for order in data:
+        order['seats'] = seats_list_from_string(order['seats'])
+        all_orders[order['order_id']] = order
+
+    print(all_orders)
+    return all_orders
+
+
+def seats_list_from_string(str):
+    numbers = str.translate(str.maketrans('', '', string.punctuation)).split()
+    list = []
+    for i in range(0, len(numbers), 2):
+        list.append((int(numbers[i]), int(numbers[i+1])))
+    return list
 
 
 if __name__ == '__main__':
