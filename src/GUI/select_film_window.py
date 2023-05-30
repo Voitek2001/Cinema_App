@@ -182,14 +182,14 @@ class Ui_show_film_window(object):
         tickets = {'normal': self.normal_tickets.value(), 'discounted': self.discounted_tickets.value()}
         print(f'Wybrano {film} {str(event["date"])} sala {event["room"]} cena {event["price"]}. Bilety: {tickets}')
 
-        self.widget.widget(6).property('ui').set_number_of_tickets(sum(tickets.values()))
-        self.widget.widget(6).property('ui').uncheck_seats()
         self.widget.currentWidget().setProperty('film_id', event['film_id'])
         self.widget.currentWidget().setProperty('film', film)
         self.widget.currentWidget().setProperty('date', event['date'])
         self.widget.currentWidget().setProperty('room', event['room'])
         self.widget.currentWidget().setProperty('price', event['price'])
         self.widget.currentWidget().setProperty('tickets', tickets)
+        self.widget.widget(6).property('ui').set_number_of_tickets(sum(tickets.values()))
+        self.widget.widget(6).property('ui').uncheck_seats()
         self.widget.setCurrentIndex(6)
 
     def go_to_intro(self):

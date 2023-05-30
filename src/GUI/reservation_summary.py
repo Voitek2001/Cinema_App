@@ -137,7 +137,7 @@ class Ui_reservation_summary(object):
             self.table_widget.setItem(row, 0, QtWidgets.QTableWidgetItem("Bilet ulgowy"))
             self.table_widget.setItem(row, 1, QtWidgets.QTableWidgetItem(str(tickets['discounted'])))
             self.table_widget.setItem(row, 2, QtWidgets.QTableWidgetItem(str(price['discounted'])))
-        total_price = tickets['normal'] * price['normal'] + tickets['discounted'] * price['discounted']
+        total_price = tickets['normal'] * int(price['normal']) + tickets['discounted'] * int(price['discounted'])
         self.price_label.setText(f'Łączna wartość zamówienia: {total_price}')
 
         self.widget.widget(9).property("ui").set_total_cost(total_price)
@@ -178,6 +178,8 @@ class Ui_reservation_summary(object):
         self.info_label.setText(_translate("Form", "Informacja o wybranym seansie"))
         self.go_further.setText(_translate("show_film_window", "Przejdź do wyboru płatności"))
         self.return_button.setText(_translate("Form", "Powrót do wyboru miejsc"))
+
+
 
 
 if __name__ == "__main__":

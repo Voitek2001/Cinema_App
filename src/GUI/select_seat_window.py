@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from admin.admin_utils import get_list_of_orders
 
 
 class Ui_select_seats(object):
@@ -6,6 +7,7 @@ class Ui_select_seats(object):
         self.widget = widget
         self.number_of_tickets = 3
         self.checked = set()
+        self.blocked = set()
 
     def setupUi(self, select_seats):
         select_seats.setObjectName("select_seats")
@@ -108,8 +110,12 @@ class Ui_select_seats(object):
 
     def uncheck_seats(self):
         self.checked.clear()
+        self.load_blocked()
         for seat in self.seats:
-            seat.setEnabled(True)
+            if (seat.property('row'), seat.property('column')) in self.blocked:
+                seat.setEnabled(False)
+            else:
+                seat.setEnabled(True)
             seat.setChecked(False)
 
     def seat_clicked(self, seat):
@@ -130,8 +136,16 @@ class Ui_select_seats(object):
 
     def set_button_enabled(self, value):
         for seat in self.seats:
-            if not seat.isChecked():
+            if not seat.isChecked() and (seat.property('row'), seat.property('column')) not in self.blocked:
                 seat.setEnabled(value)
+
+    def load_blocked(self):
+        orders = get_list_of_orders()
+        film_id = self.widget.widget(5).property('film_id')
+        self.blocked.clear()
+        for order in orders.values():
+            if order['film_id'] == film_id:
+                self.blocked.update(order['seats'])
 
     def go_further_clicked(self):
         self.widget.currentWidget().setProperty('seats', self.checked)

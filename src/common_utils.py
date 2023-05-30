@@ -47,6 +47,9 @@ def get_timedelta_from_string(time_str):
 if __name__ == '__main__':
 
 
+
+    exit()
+
     films = [{
             'category': Category.ACTION.value,
             'title': 'SkyFall',

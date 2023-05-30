@@ -86,7 +86,10 @@ class Ui_choose_payment_method(object):
         QtCore.QMetaObject.connectSlotsByName(Form)
 
     def go_further_clicked(self):
-        self.widget.setCurrentIndex(9)
+        if self.choose_radio1.isChecked():
+            self.widget.setCurrentIndex(0)
+        else:
+            self.widget.setCurrentIndex(9)
         
 
     def go_back(self):
