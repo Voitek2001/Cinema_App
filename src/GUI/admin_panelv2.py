@@ -114,6 +114,7 @@ class Ui_admin(object):
 "    border: 2px solid rgb(255, 0, 127);\n"
 "}")
         self.stat_button_2.setObjectName("stat_button_2")
+        self.stat_button_2.clicked.connect(self.go_to_data_analysis)
         self.pushButton_2.clicked.connect(self.remove_film)
 
         self.retranslateUi(Form)
@@ -127,6 +128,9 @@ class Ui_admin(object):
     def remove_film(self):
         remove_film_at(self.listWidget.currentRow())
         self.load_films()
+
+    def go_to_data_analysis(self):
+        self.widget.setCurrentIndex(11)
 
     def load_films(self):
         self.listWidget.clear()

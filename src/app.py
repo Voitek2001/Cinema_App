@@ -12,6 +12,7 @@ from GUI.choose_payment_method import Ui_choose_payment_method
 from GUI.modify_window import Ui_modify
 from GUI.payment_window import Ui_payment
 from GUI.admin_panelv2 import Ui_admin
+from GUI.data_analysis_window import Ui_data_analysis
 from ID_generator import init_order_id, init_film_id, init_payment_id
 
 
@@ -85,6 +86,11 @@ if __name__ == '__main__':
     modify_window_ui.setupUi(modify_window)
     modify_window.setProperty('ui', modify_window_ui)
 
+    # init reservation_summary window
+    data_analysis_window = QtWidgets.QWidget()
+    data_analysis_ui = Ui_data_analysis(widget)
+    data_analysis_ui.setupUi(data_analysis_window)
+
     # add windows to widget
     widget.addWidget(MainWindow)
     widget.addWidget(login_ui)
@@ -97,6 +103,7 @@ if __name__ == '__main__':
     widget.addWidget(choose_payment_method_window)
     widget.addWidget(payment_window)
     widget.addWidget(modify_window)
+    widget.addWidget(data_analysis_window)
 
     widget.setFixedWidth(760)
     widget.setFixedHeight(670)
