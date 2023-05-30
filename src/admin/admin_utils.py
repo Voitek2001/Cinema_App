@@ -68,6 +68,18 @@ def get_list_of_films():
     return all_films
 
 
+def get_raw_list_of_films():
+    data = read_json(ALL_FILMS)
+    for film in data:
+        film['date'] = get_datetime_from_string(film['film_datetime'])
+    return data
+
+
+def get_raw_list_of_orders():
+    data = read_json(ALL_ORDERS)
+    return data
+
+
 def get_list_of_orders():
 
     data = read_json(ALL_ORDERS)
@@ -87,6 +99,59 @@ def seats_list_from_string(str):
     for i in range(0, len(numbers), 2):
         list.append((int(numbers[i]), int(numbers[i+1])))
     return list
+
+
+def add_new_film(film_datetime, duration, category, title, room_id, ticket_price):
+
+    data = read_json(ALL_FILMS)
+
+    check_for_collision(data, room_id, film_datetime, duration)
+
+    new_film = create_new_film(category, title, film_datetime, duration, room_id, ticket_price)
+
+    data.append(new_film)
+    write_to_json(ALL_FILMS, data)
+
+
+def get_list_of_films():
+
+    data = read_json(ALL_FILMS)
+    all_films = {}
+
+    for film in data:
+
+        all_films[film['title']] = all_films.get(film['title'], []) + [{"date": get_datetime_from_string(film['film_datetime']), "room": film['room_id'], "price": film['price'], "film_id": film['film_id']}]
+
+    print(all_films)
+    return all_films
+
+def remove_film_at(index):
+
+    data = read_json(ALL_FILMS)
+    all_films = []
+    for i, film in enumerate(data):
+        if i == index:
+            continue
+        all_films.append(film)
+
+    write_to_json(ALL_FILMS, all_films)
+
+def load_film_at(index):
+    data = read_json(ALL_FILMS)
+    for i, film in enumerate(data):
+        if i == index:
+            return film
+
+def replace_film_at(index, to_rep_film):
+    data = read_json(ALL_FILMS)
+    all_films = []
+    for i, film in enumerate(data):
+        if i == index:
+            all_films.append(to_rep_film)
+            continue
+        all_films.append(film)
+
+    write_to_json(ALL_FILMS, all_films)
 
 
 if __name__ == '__main__':

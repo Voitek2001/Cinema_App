@@ -125,6 +125,7 @@ class Ui_NewFilm(object):
 "    border-radius: 20px;\n"
 "    color: white;\n"
 "}")
+
         self.new_film_room_id.setAlignment(QtCore.Qt.AlignCenter)
         self.new_film_room_id.setObjectName("new_film_room_id")
         self.lineEdit = QtWidgets.QLineEdit(new_film)
@@ -281,6 +282,8 @@ class Ui_NewFilm(object):
         except ValueError as err_msg:
             print(err_msg)
             self.label_4.setText(str(err_msg))
+        self.widget.widget(2).property('ui').load_films()
+
 
     def go_back_to_admin_panel(self):
         self.widget.setCurrentIndex(2)
@@ -338,7 +341,8 @@ def switch_cat(curr_cat):
         return Category.THRILLER
     elif curr_cat == "Western":
         return Category.WESTERN
-
+    elif curr_cat == "Horror":
+        return Category.HORROR
 
 
 if __name__ == "__main__":
