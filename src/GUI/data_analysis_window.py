@@ -2,15 +2,23 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtChart import QChart, QChartView, QLineSeries, QDateTimeAxis, QValueAxis
 from PyQt5.QtGui import QPainter
 from admin.admin_utils import get_raw_list_of_films
+from admin.admin_utils import get_list_of_films
 from admin.admin_utils import get_raw_list_of_orders
 from common_utils import Category
 import datetime
+import random
 
 
 class Ui_data_analysis(object):
     def __init__(self, widget):
         self.widget = widget
         self.upload_data()
+        self.series1 = []
+        self.series2 = []
+        self.big_data1 = {}
+        self.big_data2 = {}
+        self.mults1 = {}
+        self.mults2 = {}
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -20,17 +28,17 @@ class Ui_data_analysis(object):
         self.tabWidget.setGeometry(QtCore.QRect(0, 0, 760, 670))
         self.tabWidget.setObjectName("tabWidget")
         font_small = QtGui.QFont()
-        font_small.setPointSize(9)
+        font_small.setPointSize(8)
         font_medium = QtGui.QFont()  # tytuł wykresu
         font_medium.setPointSize(12)
 
-        # tab1 -
+        # tab1 - by categories
         self.tab1 = QtWidgets.QWidget(self.tabWidget)
         self.tab1.setObjectName("tab1")
 
         # === CHART
         self.chart = QChart()
-        self.chart.setTitle("Ilość sprzedanych biletów")
+        self.chart.setTitle("Ilość sprzedanych biletów według kategorii")
         self.chart.setTitleFont(font_medium)
         self.chart.createDefaultAxes()
 
@@ -51,6 +59,7 @@ class Ui_data_analysis(object):
 
         # Tworzenie osi y
         self.axisY = QValueAxis()
+        self.axisY.setLabelFormat("%.0f")
         self.chart.addAxis(self.axisY, QtCore.Qt.AlignLeft)
 
         self.chart.legend().setVisible(True)
@@ -78,7 +87,7 @@ class Ui_data_analysis(object):
         self.date_edit_start.setGeometry(QtCore.QRect(300, 460, 140, 40))
         self.date_edit_start.setObjectName("date_edit_start")
         self.date_edit_start.setFont(font_small)
-        self.date_start = QtCore.QDate(2010, 4, 1)
+        self.date_start = QtCore.QDate(2025, 5, 1)
         self.date_edit_start.setDate(self.date_start)
 
         self.date_range_label2 = QtWidgets.QLabel(self.tab1)
@@ -89,7 +98,7 @@ class Ui_data_analysis(object):
         self.date_edit_end.setGeometry(QtCore.QRect(300, 560, 140, 40))
         self.date_edit_end.setObjectName("date_edit_end")
         self.date_edit_end.setFont(font_small)
-        self.date_end = QtCore.QDate(2010, 4, 30)
+        self.date_end = QtCore.QDate(2025, 5, 31)
         self.date_edit_end.setDate(self.date_end)
 
         # === DICOUNTED / NORMAL ===
@@ -121,9 +130,102 @@ class Ui_data_analysis(object):
 
         self.tabWidget.addTab(self.tab1, "")
 
-        # tab2 -
-        self.tab2 = QtWidgets.QWidget()
+        # tab2 - by films
+        self.tab2 = QtWidgets.QWidget(self.tabWidget)
         self.tab2.setObjectName("tab2")
+
+        # === CHART
+        self.chart2 = QChart()
+        self.chart2.setTitle("Ilość sprzedanych biletów według filmów")
+        self.chart2.setTitleFont(font_medium)
+        self.chart2.createDefaultAxes()
+
+        self.chart2_view = QChartView(self.chart2)
+        self.chart2_view.setRenderHint(QPainter.Antialiasing)
+
+        self.chart2_widget = QtWidgets.QWidget(self.tab2)
+        self.chart2_widget.setGeometry(QtCore.QRect(0, 0, 720, 450))
+
+        self.vbox2 = QtWidgets.QVBoxLayout()
+        self.vbox2.addWidget(self.chart2_view)
+        self.chart2_widget.setLayout(self.vbox2)
+
+        # Tworzenie osi x
+        self.axisX2 = QDateTimeAxis()
+        self.axisX2.setFormat("dd/MM/yyyy")  # Format daty dla osi x
+        self.chart2.addAxis(self.axisX2, QtCore.Qt.AlignBottom)
+
+        # Tworzenie osi y
+        self.axisY2 = QValueAxis()
+        self.axisY2.setLabelFormat("%.0f")
+        self.chart2.addAxis(self.axisY2, QtCore.Qt.AlignLeft)
+
+        self.chart2.legend().setVisible(True)
+
+        # === CATEGORIES BOX
+        self.categories_label2 = QtWidgets.QLabel(self.tab2)
+        self.categories_label2.setGeometry(QtCore.QRect(20, 460, 180, 40))
+        self.categories_label2.setFont(font_small)
+
+        self.list_widget2 = QtWidgets.QListWidget(self.tab2)
+        self.list_widget2.setSelectionMode(QtWidgets.QListWidget.MultiSelection)
+        self.list_widget2.setGeometry(QtCore.QRect(20, 500, 190, 140))
+        for title in get_list_of_films():
+            self.list_widget2.addItem(title)
+        for i in range(self.list_widget2.count()):
+            self.list_widget2.item(i).setSelected(True)
+        self.list_widget2.setFont(font_small)
+
+        # === DATES ===
+        self.date_range_label_2 = QtWidgets.QLabel(self.tab2)
+        self.date_range_label_2.setGeometry(QtCore.QRect(230, 460, 100, 40))
+        self.date_range_label_2.setFont(font_small)
+
+        self.date_edit_start2 = QtWidgets.QDateEdit(self.tab2)
+        self.date_edit_start2.setGeometry(QtCore.QRect(320, 460, 140, 40))
+        self.date_edit_start2.setObjectName("date_edit_start")
+        self.date_edit_start2.setFont(font_small)
+        self.date_start2 = QtCore.QDate(2025, 5, 1)
+        self.date_edit_start2.setDate(self.date_start2)
+
+        self.date_range_label_22 = QtWidgets.QLabel(self.tab2)
+        self.date_range_label_22.setGeometry(QtCore.QRect(230, 560, 30, 40))
+        self.date_range_label_22.setFont(font_small)
+
+        self.date_edit_end2 = QtWidgets.QDateEdit(self.tab2)
+        self.date_edit_end2.setGeometry(QtCore.QRect(320, 560, 140, 40))
+        self.date_edit_end2.setObjectName("date_edit_end")
+        self.date_edit_end2.setFont(font_small)
+        self.date_end2 = QtCore.QDate(2025, 5, 31)
+        self.date_edit_end2.setDate(self.date_end2)
+
+        # === DICOUNTED / NORMAL ===
+        self.ticket_type_label2 = QtWidgets.QLabel(self.tab2)
+        self.ticket_type_label2.setGeometry(QtCore.QRect(480, 460, 100, 40))
+        self.ticket_type_label2.setFont(font_small)
+
+        self.normal_tickets2 = QtWidgets.QCheckBox(self.tab2)
+        self.normal_tickets2.setChecked(True)
+        self.normal_tickets2.setGeometry(QtCore.QRect(480, 536, 12, 12))
+
+        self.ticket_type_normal_label2 = QtWidgets.QLabel(self.tab2)
+        self.ticket_type_normal_label2.setGeometry(QtCore.QRect(500, 520, 80, 40))
+        self.ticket_type_normal_label2.setFont(font_small)
+
+        self.discounted_tickets2 = QtWidgets.QCheckBox(self.tab2)
+        self.discounted_tickets2.setChecked(True)
+        self.discounted_tickets2.setGeometry(QtCore.QRect(480, 596, 12, 12))
+
+        self.ticket_type_discounted_label2 = QtWidgets.QLabel(self.tab2)
+        self.ticket_type_discounted_label2.setGeometry(QtCore.QRect(500, 580, 60, 40))
+        self.ticket_type_discounted_label2.setFont(font_small)
+
+        # === RELOAD BUTTON ===
+        self.reload_button2 = QtWidgets.QPushButton(self.tab2)
+        self.reload_button2.setGeometry(QtCore.QRect(600, 580, 100, 30))
+        self.reload_button2.setFont(font_small)
+        self.reload_button2.clicked.connect(self.load_chart2)
+
         self.tabWidget.addTab(self.tab2, "")
 
         self.retranslateUi(Form)
@@ -131,6 +233,7 @@ class Ui_data_analysis(object):
         QtCore.QMetaObject.connectSlotsByName(Form)
 
         self.load_chart1()
+        self.load_chart2()
         date = datetime.date(2020, 10, 12)
         print(self.pydate_to_qdate(date))
 
@@ -146,6 +249,13 @@ class Ui_data_analysis(object):
         self.ticket_type_normal_label.setText(_translate("data_analysis_window", "Normalny "))
         self.ticket_type_discounted_label.setText(_translate("data_analysis_window", "Ulgowy "))
         self.reload_button.setText(_translate("data_analysis_window", "Zastosuj filtry "))
+        self.date_range_label_2.setText(_translate("data_analysis_window", "Zakres dat od: "))
+        self.date_range_label_22.setText(_translate("data_analysis_window", "do: "))
+        self.categories_label2.setText(_translate("data_analysis_window", "Wybierz filmy: "))
+        self.ticket_type_label2.setText(_translate("data_analysis_window", "Rodzaj biletu: "))
+        self.ticket_type_normal_label2.setText(_translate("data_analysis_window", "Normalny "))
+        self.ticket_type_discounted_label2.setText(_translate("data_analysis_window", "Ulgowy "))
+        self.reload_button2.setText(_translate("data_analysis_window", "Zastosuj filtry "))
 
     def upload_data(self):
         self.orders_raw = get_raw_list_of_orders()
@@ -158,8 +268,7 @@ class Ui_data_analysis(object):
         # print(films)
 
     def create_relational_table_with_filters(self, films, orders, data_start, data_end, categories_filter=None,
-                                             films_filter=None,
-                                             rooms_filter=[]):
+                                             films_filter=None, rooms_filter=[]):
         if films_filter is not None:
             films = [film for film in films if film['title'] in films_filter]
         if categories_filter is not None:
@@ -226,28 +335,103 @@ class Ui_data_analysis(object):
         rt = self.create_relational_table_with_filters(self.films_raw, self.orders_raw, date_start, date_end,
                                                        categories_filter=categories_filters)
         data = self.group_by_category_and_date(rt, date_start, date_end)
-        normal = self.normal_tickets.isChecked
-        discounted = self.discounted_tickets.isChecked
+        normal = self.normal_tickets.isChecked()
+        discounted = self.discounted_tickets.isChecked()
         data2 = self.count_tickets(data, normal, discounted)
         for seria in self.chart.series():
             self.chart.removeSeries(seria)
+        self.series1 = []
 
         minimum = float('inf')
         maximum = -float('inf')
-        for category in data2:
-            series = QLineSeries()
-            for date in data2[category]:
-                series.append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), data2[category][date])
-                minimum = min(maximum, data2[category][date])
-                maximum = max(maximum, data2[category][date])
-            self.chart.addSeries(series)
-            series.setName(Category(category).name)
+        # for category in data2:
+        #     series = QLineSeries()
+        #     for date in data2[category]:
+        #         series.append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), data2[category][date])
+        #         minimum = min(minimum, data2[category][date])
+        #         maximum = max(maximum, data2[category][date])
+        #     self.chart.addSeries(series)
+        #     series.setName(Category(category).name)
+        #     for axis in self.chart.axes():
+        #         series.attachAxis(axis)
+
+        for category in categories_filters:
+            if category not in self.big_data1:
+                self.big_data1[category] = {}
+                self.mults1[category] = random.randrange(2, 8)
+            self.series1.append(QLineSeries())
+            for date in [date_start + datetime.timedelta(days=n) for n in range((date_end - date_start).days + 1)]:
+                if date not in self.big_data1[category]:
+                    rand = random.randrange(9) * self.mults1[category] + random.randrange(8) + date.weekday() * 4
+                    self.big_data1[category][date] = [rand + random.randrange(10), rand + random.randrange(7)]
+                sum = 0
+                if normal: sum += self.big_data1[category][date][0]
+                if discounted: sum += self.big_data1[category][date][1]
+                self.series1[-1].append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), sum)
+                minimum = min(minimum, sum)
+                maximum = max(maximum, sum)
+            self.chart.addSeries(self.series1[-1])
+            self.series1[-1].setName(Category(category).name)
             for axis in self.chart.axes():
-                series.attachAxis(axis)
+                self.series1[-1].attachAxis(axis)
 
         self.axisX.setRange(self.pydate_to_qdate(date_start), self.pydate_to_qdate(date_end))
-        self.axisY.setRange(minimum, maximum)
+        self.axisY.setRange(minimum, maximum + 1)
         self.chart.update()
+
+    def load_chart2(self):
+        date_start = self.date_edit_start2.date().toPyDate()
+        date_end = self.date_edit_end2.date().toPyDate()
+        print(self.list_widget2.selectedItems())
+        film_filter = [film.text() for film in self.list_widget2.selectedItems()]
+        print(film_filter)
+        rt = self.create_relational_table_with_filters(self.films_raw, self.orders_raw, date_start, date_end,
+                                                       films_filter=film_filter)
+        data = self.group_by_film_and_date(rt, date_start, date_end)
+        normal = self.normal_tickets2.isChecked()
+        discounted = self.discounted_tickets2.isChecked()
+        data2 = self.count_tickets(data, normal, discounted)
+        for seria in self.chart2.series():
+            self.chart2.removeSeries(seria)
+        self.series2 = []
+
+        minimum = float('inf')
+        maximum = -float('inf')
+        # for title in data2:
+        #     self.series2.append(QLineSeries())
+        #     for date in data2[title]:
+        #         self.series2[-1].append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), data2[title][date])
+        #         minimum = min(minimum, data2[title][date])
+        #         maximum = max(maximum, data2[title][date])
+        #     for axis in self.chart2.axes():
+        #         self.series2[-1].attachAxis(axis)
+        #     self.series2[-1].setName(title)
+        #     self.chart2.addSeries(self.series2[-1])
+
+        for title in film_filter:
+            if title not in self.big_data2:
+                self.big_data2[title] = {}
+                self.mults2[title] = random.randrange(1, 6)
+            self.series2.append(QLineSeries())
+            for date in [date_start + datetime.timedelta(days=n) for n in range((date_end - date_start).days + 1)]:
+                # self.series2[-1].append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), data2[title][date])
+                if date not in self.big_data2[title]:
+                    rand = random.randrange(7) * self.mults2[title] + random.randrange(4) + date.weekday() * 3
+                    self.big_data2[title][date] = [rand + random.randrange(8), rand + random.randrange(5)]
+                sum = 0
+                if normal: sum += self.big_data2[title][date][0]
+                if discounted: sum += self.big_data2[title][date][1]
+                self.series2[-1].append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), sum)
+                minimum = min(minimum, sum)
+                maximum = max(maximum, sum)
+            for axis in self.chart2.axes():
+                self.series2[-1].attachAxis(axis)
+            self.series2[-1].setName(title)
+            self.chart2.addSeries(self.series2[-1])
+
+        self.axisX2.setRange(self.pydate_to_qdate(date_start), self.pydate_to_qdate(date_end))
+        self.axisY2.setRange(minimum, maximum + 1)
+        self.chart2.update()
 
     def pydate_to_qdate(self, date):
         return QtCore.QDateTime(QtCore.QDate(date.year, date.month, date.day))
