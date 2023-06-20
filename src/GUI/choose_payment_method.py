@@ -90,7 +90,6 @@ class Ui_choose_payment_method(object):
             self.widget.setCurrentIndex(0)
         else:
             self.widget.setCurrentIndex(9)
-        
 
     def go_back(self):
         self.widget.setCurrentIndex(7)
@@ -103,14 +102,3 @@ class Ui_choose_payment_method(object):
         self.choose_radio2.setText(_translate("Form", "Płacę teraz"))
         self.go_further.setText(_translate("show_film_window", "Potwierdzam i płacę"))
         self.return_button.setText(_translate("Form", "Powrót"))
-
-
-if __name__ == "__main__":
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-    Form = QtWidgets.QWidget()
-    ui = Ui_Form()
-    ui.setupUi(Form)
-    Form.show()
-    sys.exit(app.exec_())

@@ -194,14 +194,3 @@ class Ui_show_film_window(object):
 
     def go_to_intro(self):
         self.widget.setCurrentIndex(0)
-
-
-if __name__ == "__main__":
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-    show_film_window = QtWidgets.QMainWindow()
-    ui = Ui_show_film_window()
-    ui.setupUi(show_film_window)
-    show_film_window.show()
-    sys.exit(app.exec_())

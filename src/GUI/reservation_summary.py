@@ -7,6 +7,7 @@ class Ui_reservation_summary(object):
     def __init__(self, widget):
         self.widget = widget
         self.selected_seats = []
+
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(760, 670)
@@ -142,7 +143,6 @@ class Ui_reservation_summary(object):
 
         self.widget.widget(9).property("ui").set_total_cost(total_price)
 
-
     def go_further_clicked(self):
 
         order_id = get_and_inc_order()
@@ -178,16 +178,3 @@ class Ui_reservation_summary(object):
         self.info_label.setText(_translate("Form", "Informacja o wybranym seansie"))
         self.go_further.setText(_translate("show_film_window", "Przejdź do wyboru płatności"))
         self.return_button.setText(_translate("Form", "Powrót do wyboru miejsc"))
-
-
-
-
-if __name__ == "__main__":
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-    Form = QtWidgets.QWidget()
-    ui = Ui_Form()
-    ui.setupUi(Form)
-    Form.show()
-    sys.exit(app.exec_())

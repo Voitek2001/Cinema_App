@@ -5,6 +5,7 @@ from admin.admin_utils import get_raw_list_of_films
 from admin.admin_utils import get_list_of_films
 from admin.admin_utils import get_raw_list_of_orders
 from common_utils import Category
+from data_analysis import *
 import datetime
 import random
 
@@ -13,12 +14,6 @@ class Ui_data_analysis(object):
     def __init__(self, widget):
         self.widget = widget
         self.upload_data()
-        self.series1 = []
-        self.series2 = []
-        self.big_data1 = {}
-        self.big_data2 = {}
-        self.mults1 = {}
-        self.mults2 = {}
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -173,7 +168,8 @@ class Ui_data_analysis(object):
         for title in get_list_of_films():
             self.list_widget2.addItem(title)
         for i in range(self.list_widget2.count()):
-            self.list_widget2.item(i).setSelected(True)
+            if random.random() < 0.2:
+                self.list_widget2.item(i).setSelected(True)
         self.list_widget2.setFont(font_small)
 
         # === DATES ===
@@ -235,7 +231,6 @@ class Ui_data_analysis(object):
         self.load_chart1()
         self.load_chart2()
         date = datetime.date(2020, 10, 12)
-        print(self.pydate_to_qdate(date))
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
@@ -261,188 +256,64 @@ class Ui_data_analysis(object):
         self.orders_raw = get_raw_list_of_orders()
         self.films_raw = get_raw_list_of_films()
 
-    def filter_films_by_date(self, start, end, films):
-        end += datetime.timedelta(days=1)
-        for film in films:
-            films[film] = [seans for seans in films[film] if start <= seans['date'] < end]
-        # print(films)
-
-    def create_relational_table_with_filters(self, films, orders, data_start, data_end, categories_filter=None,
-                                             films_filter=None, rooms_filter=[]):
-        if films_filter is not None:
-            films = [film for film in films if film['title'] in films_filter]
-        if categories_filter is not None:
-            films = [film for film in films if film['category'] in categories_filter]
-        films = [film for film in films if data_start <= film['date'].date() <= data_end]
-        if rooms_filter:
-            films = [film for film in films if film['room_id'] in rooms_filter]
-        films = {film['film_id']: film for film in films}
-
-        relational_table = []
-        for order in orders:
-            if order['film_id'] in films:
-                film = films[order['film_id']]
-                data = {'category': film['category'], 'title': film['title'], 'date': film['date'],
-                        'room_id': film['room_id'], 'price': film['price'],
-                        'n_normal_tickets': order['n_normal_tickets'], 'n_disc_tickets': order['n_disc_tickets'],
-                        'total_cost': float(order['total_cost'])}
-                relational_table.append(data)
-        return relational_table
-
-    def group_by_film_and_date(self, relational_table, start_date, end_date):
-        data = {}
-
-        for elem in relational_table:
-            if elem['title'] not in data:
-                data[elem['title']] = {date: [] for date in [start_date + datetime.timedelta(days=n) for n in
-                                                             range((end_date - start_date).days + 1)]}
-            data[elem['title']][elem['date'].date()].append((elem['n_normal_tickets'], elem['n_disc_tickets']))
-        return data
-
-    def group_by_category_and_date(self, relational_table, start_date, end_date):
-        data = {}
-
-        for elem in relational_table:
-            if elem['category'] not in data:
-                data[elem['category']] = {date: [] for date in [start_date + datetime.timedelta(days=n) for n in
-                                                                range((end_date - start_date).days + 1)]}
-            data[elem['category']][elem['date'].date()].append((elem['n_normal_tickets'], elem['n_disc_tickets']))
-        return data
-
-    def count_tickets(self, data, normal=True, discounted=True):
-        data2 = {}
-        for title, dates in data.items():
-            data2[title] = {}
-            for date, tickets in dates.items():
-                norm, disc = 0, 0
-                for ticket in tickets:
-                    norm += ticket[0]
-                    disc += ticket[1]
-                sum = 0
-                if normal:
-                    sum += norm
-                if discounted:
-                    sum += disc
-                data2[title][date] = sum
-        return data2
-
     def load_chart1(self):
         date_start = self.date_edit_start.date().toPyDate()
         date_end = self.date_edit_end.date().toPyDate()
-        print(self.list_widget.selectedItems())
         categories_filters = [Category[cat.text()].value for cat in self.list_widget.selectedItems()]
-        print(categories_filters)
-        rt = self.create_relational_table_with_filters(self.films_raw, self.orders_raw, date_start, date_end,
-                                                       categories_filter=categories_filters)
-        data = self.group_by_category_and_date(rt, date_start, date_end)
+        rt = create_relational_table_with_filters(self.films_raw, self.orders_raw, date_start, date_end,
+                                                  categories_filter=categories_filters)
+        data = group_by_category_and_date(rt, date_start, date_end)
         normal = self.normal_tickets.isChecked()
         discounted = self.discounted_tickets.isChecked()
-        data2 = self.count_tickets(data, normal, discounted)
+        data2 = count_tickets(data, normal, discounted)
         for seria in self.chart.series():
             self.chart.removeSeries(seria)
         self.series1 = []
 
         minimum = float('inf')
         maximum = -float('inf')
-        # for category in data2:
-        #     series = QLineSeries()
-        #     for date in data2[category]:
-        #         series.append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), data2[category][date])
-        #         minimum = min(minimum, data2[category][date])
-        #         maximum = max(maximum, data2[category][date])
-        #     self.chart.addSeries(series)
-        #     series.setName(Category(category).name)
-        #     for axis in self.chart.axes():
-        #         series.attachAxis(axis)
-
-        for category in categories_filters:
-            if category not in self.big_data1:
-                self.big_data1[category] = {}
-                self.mults1[category] = random.randrange(2, 8)
-            self.series1.append(QLineSeries())
-            for date in [date_start + datetime.timedelta(days=n) for n in range((date_end - date_start).days + 1)]:
-                if date not in self.big_data1[category]:
-                    rand = random.randrange(9) * self.mults1[category] + random.randrange(8) + date.weekday() * 4
-                    self.big_data1[category][date] = [rand + random.randrange(10), rand + random.randrange(7)]
-                sum = 0
-                if normal: sum += self.big_data1[category][date][0]
-                if discounted: sum += self.big_data1[category][date][1]
-                self.series1[-1].append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), sum)
-                minimum = min(minimum, sum)
-                maximum = max(maximum, sum)
-            self.chart.addSeries(self.series1[-1])
-            self.series1[-1].setName(Category(category).name)
+        for category in data2:
+            series = QLineSeries()
+            for date in data2[category]:
+                series.append(pydate_to_qdate(date).toMSecsSinceEpoch(), data2[category][date])
+                minimum = min(minimum, data2[category][date])
+                maximum = max(maximum, data2[category][date])
+            self.chart.addSeries(series)
+            series.setName(Category(category).name)
             for axis in self.chart.axes():
-                self.series1[-1].attachAxis(axis)
+                series.attachAxis(axis)
 
-        self.axisX.setRange(self.pydate_to_qdate(date_start), self.pydate_to_qdate(date_end))
+        self.axisX.setRange(pydate_to_qdate(date_start), pydate_to_qdate(date_end))
         self.axisY.setRange(minimum, maximum + 1)
         self.chart.update()
 
     def load_chart2(self):
         date_start = self.date_edit_start2.date().toPyDate()
         date_end = self.date_edit_end2.date().toPyDate()
-        print(self.list_widget2.selectedItems())
         film_filter = [film.text() for film in self.list_widget2.selectedItems()]
-        print(film_filter)
-        rt = self.create_relational_table_with_filters(self.films_raw, self.orders_raw, date_start, date_end,
-                                                       films_filter=film_filter)
-        data = self.group_by_film_and_date(rt, date_start, date_end)
+        rt = create_relational_table_with_filters(self.films_raw, self.orders_raw, date_start, date_end,
+                                                  films_filter=film_filter)
+        data = group_by_film_and_date(rt, date_start, date_end)
         normal = self.normal_tickets2.isChecked()
         discounted = self.discounted_tickets2.isChecked()
-        data2 = self.count_tickets(data, normal, discounted)
+        data2 = count_tickets(data, normal, discounted)
         for seria in self.chart2.series():
             self.chart2.removeSeries(seria)
         self.series2 = []
 
         minimum = float('inf')
         maximum = -float('inf')
-        # for title in data2:
-        #     self.series2.append(QLineSeries())
-        #     for date in data2[title]:
-        #         self.series2[-1].append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), data2[title][date])
-        #         minimum = min(minimum, data2[title][date])
-        #         maximum = max(maximum, data2[title][date])
-        #     for axis in self.chart2.axes():
-        #         self.series2[-1].attachAxis(axis)
-        #     self.series2[-1].setName(title)
-        #     self.chart2.addSeries(self.series2[-1])
-
-        for title in film_filter:
-            if title not in self.big_data2:
-                self.big_data2[title] = {}
-                self.mults2[title] = random.randrange(1, 6)
+        for title in data2:
             self.series2.append(QLineSeries())
-            for date in [date_start + datetime.timedelta(days=n) for n in range((date_end - date_start).days + 1)]:
-                # self.series2[-1].append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), data2[title][date])
-                if date not in self.big_data2[title]:
-                    rand = random.randrange(7) * self.mults2[title] + random.randrange(4) + date.weekday() * 3
-                    self.big_data2[title][date] = [rand + random.randrange(8), rand + random.randrange(5)]
-                sum = 0
-                if normal: sum += self.big_data2[title][date][0]
-                if discounted: sum += self.big_data2[title][date][1]
-                self.series2[-1].append(self.pydate_to_qdate(date).toMSecsSinceEpoch(), sum)
-                minimum = min(minimum, sum)
-                maximum = max(maximum, sum)
+            for date in data2[title]:
+                self.series2[-1].append(pydate_to_qdate(date).toMSecsSinceEpoch(), data2[title][date])
+                minimum = min(minimum, data2[title][date])
+                maximum = max(maximum, data2[title][date])
             for axis in self.chart2.axes():
                 self.series2[-1].attachAxis(axis)
             self.series2[-1].setName(title)
             self.chart2.addSeries(self.series2[-1])
 
-        self.axisX2.setRange(self.pydate_to_qdate(date_start), self.pydate_to_qdate(date_end))
+        self.axisX2.setRange(pydate_to_qdate(date_start), pydate_to_qdate(date_end))
         self.axisY2.setRange(minimum, maximum + 1)
         self.chart2.update()
-
-    def pydate_to_qdate(self, date):
-        return QtCore.QDateTime(QtCore.QDate(date.year, date.month, date.day))
-
-
-if __name__ == "__main__":
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-    Form = QtWidgets.QWidget()
-    ui = Ui_Form()
-    ui.setupUi(Form)
-    Form.show()
-    sys.exit(app.exec_())

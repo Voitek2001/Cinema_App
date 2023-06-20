@@ -157,14 +157,3 @@ class Ui_select_seats(object):
     def go_back(self):
         self.widget.setCurrentIndex(5)
         print(self.number_of_tickets)
-
-
-if __name__ == "__main__":
-    import sys
-
-    app = QtWidgets.QApplication(sys.argv)
-    select_seats = QtWidgets.QWidget()
-    ui = Ui_select_seats()
-    ui.setupUi(select_seats)
-    select_seats.show()
-    sys.exit(app.exec_())
