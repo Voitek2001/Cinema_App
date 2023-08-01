@@ -1,5 +1,5 @@
 # Cinema project - project for Theory of Python Course
-### Wojciech Suski, 2022/23 summer semester, Computer Science WIEiT AGH UST
+### 2022/23 summer semester, Computer Science WIEiT AGH UST
 
 Cinema project has a GUI implemented in Polish language.
 It provides a user and admin interface and functionality.
